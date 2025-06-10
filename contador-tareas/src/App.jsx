@@ -1,21 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import './App.css'
 
 function App () {
-  const [tareas, setTareas] = useState([])
+  const [tareas, setTareas] = useState(JSON.parse(localStorage.getItem('tareas')) || [])
   const [nuevaTarea, setNuevaTarea] = useState('')
   const [duracion, setDuracion] = useState('')
-
-  // Efecto secundario: Actualizar el título del documento cada vez que cambia el total
-  useEffect(() => {
-    document.title = `Total: ${calcularTiempoTotal} minutos`
-  }, [tareas])  // Se ejecuta cada vez que las tareas cambian
-
   // Cálculo de tiempo total optimizado con useMemo
   const calcularTiempoTotal = useMemo(() => {
     console.log('Calculando tiempo total...')
     return tareas.reduce((total, tarea) => total + tarea.duracion, 0)
   }, [tareas]) // Solo se recalcula cuando cambian las tareas
-
+  // Efecto secundario: Actualizar el título del documento cada vez que cambia el total
+  useEffect(() => {
+    document.title = `Total: ${calcularTiempoTotal} minutos`
+  }, [tareas, calcularTiempoTotal])  // Se ejecuta cada vez que las tareas cambian
   // Función para agregar una nueva tarea
   const agregarTarea = () => {
     if (nuevaTarea && duracion) {
@@ -23,14 +21,16 @@ function App () {
         nombre: nuevaTarea,
         duracion: parseInt(duracion)
       }
-      setTareas([...tareas, nuevaTareaObj])
+      const tareasCompletas = [...tareas, nuevaTareaObj]
+      setTareas(tareasCompletas)
       setNuevaTarea('')
       setDuracion('')
+      localStorage.setItem('tareas', JSON.stringify(tareasCompletas))
     }
   }
 
   return (
-    <div>
+    <div className='container'>
       <h1>Contador de Tareas</h1>
       <div>
         <input
